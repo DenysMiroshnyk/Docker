@@ -5,20 +5,23 @@ FROM ubuntu:22.04
 RUN apt-get update && apt-get install -y \
     wget \
     unzip \
-    clang \
     git \
-    python3-pip
+    python3-pip \
+    pkg-config \
+    ninja-build 
 
-# Install Conan 1.58
-RUN pip3 install conan==1.58.0
+# Install Conan 1.60
+RUN pip3 install conan==1.60.0
 
 # Download and extract CMake 3.27.5
 RUN wget https://github.com/Kitware/CMake/releases/download/v3.27.5/cmake-3.27.5-linux-x86_64.tar.gz && \
     tar -xzvf cmake-3.27.5-linux-x86_64.tar.gz -C /usr/local --strip-components=1
 
-# Set environment variables
-ENV CC=clang
-ENV CXX=clang++
+# Download and extract LLVM-MinGW
+RUN wget https://github.com/mstorsjo/llvm-mingw/releases/download/20230614/llvm-mingw-20230614-ucrt-ubuntu-20.04-x86_64.tar.xz && \
+    tar -xf llvm-mingw-20230614-ucrt-ubuntu-20.04-x86_64.tar.xz -C /usr/local 
+
+ENV PATH="/usr/local/llvm-mingw-20230614-ucrt-ubuntu-20.04-x86_64/bin:$PATH"
 
 # Download and install the Vulkan SDK
 RUN wget -qO- https://packages.lunarg.com/lunarg-signing-key-pub.asc | tee /etc/apt/trusted.gpg.d/lunarg.asc && \
@@ -30,4 +33,5 @@ RUN wget -qO- https://packages.lunarg.com/lunarg-signing-key-pub.asc | tee /etc/
 RUN apt-get clean && \
     rm -rf /var/lib/apt/lists/* \
     rm -rf vulkan-sdk.tar.gz VulkanSDK \
-    rm cmake-3.27.5-linux-x86_64.tar.gz
+    rm cmake-3.27.5-linux-x86_64.tar.gz \
+    rm llvm-mingw-20230614-ucrt-ubuntu-20.04-x86_64.tar.xz 
